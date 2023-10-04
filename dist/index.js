@@ -11061,8 +11061,7 @@ function buildMessage(pylint_output, min_score) {
         score_icon = "❌";
     }
     message += `${score_icon} Score: ${pylint_report["score"]}/10\n\n`;
-
-    message += '## ✉️ Messages'
+    message += '## ✉️ Messages \n'
     pylint_messages = pylint_output["messages"];
     message_types.forEach(msg_type => {
         msgs = pylint_messages.filter(message => message.type == msg_type);
@@ -11079,7 +11078,7 @@ function buildMessageTable(msgs, header, collapse) {
     msg += '| Code | Description | File | Line | Column |\n';
     msg += '| ---- | ----------- | ---- | ---- | ------ |\n';
     msgs.forEach(m => {
-        msg += `| ${m['message-id']} | ${m.message} | ${m.path} | ${m.line} | ${m.column} |\n`;
+        msg += `| ${m.messageId} | ${m.message} | ${m.path} | ${m.line} | ${m.column} |\n`;
     })
     msg += '\n';
 
