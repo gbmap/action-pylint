@@ -8,6 +8,15 @@ let output = '';
 let pylint_options = '';
 const default_no_error_message = 'No lint errors found';
 
+let message_types = ['error', 'warning', 'info', 'convention', 'refactor'];
+let message_headers = {
+    'error': 'Errors 🚫',
+    'warning': 'Warnings ⚠️',
+    'info': 'Information ⚠',
+    'convention': 'Conventions 📖',
+    'refactor': 'Refactors 🛠️'
+};
+
 function commentPr(message, token) {
     const context = github.context;
     const client = github.getOctokit(token);
@@ -18,18 +27,22 @@ function commentPr(message, token) {
     });
 }
 
-function parseLintMessage(lint_message) {
-    return `${lint_message.type} [${lint_message['message-id']}] ${lint_message.message} (${lint_message.path}:${lint_message.line}:${lint_message.column})`;
+function buildMessage(pylint_output) {
+    let message = "# 🧶 Pylint Results\n";
+    message_types.forEach(msg_type => {
+        msgs = pylint_output.filter(message => message.type == msg_type);
+        message += buildMessageTable(msgs, message_headers[msg_type]);
+    });
+    return message;
 }
 
-function buildMessage(msgs, type) {
-    if (msgs.length == 0) {
-        return '';
-    }
-
-    let message = `===> ${msgs.length} ${type}(s) found:\n`;
-    msgs.forEach(msg => message += `- ${parseLintMessage(msg)}\n`);
-    return message;
+function buildMessageTable(msgs, header) {
+    let msg = `## ${header} (${msgs.length})\n`;
+    msg += '| Code | Description | File | Line | Column |\n';
+    msg += '| ---- | ----------- | ---- | ---- | ------ |\n';
+    msgs.forEach(m => {
+        msg += `| ${m['message-id']} | ${m.message} | ${m.path} | ${m.line} | ${m.column} |\n`;
+    })
 }
 
 async function run() {
@@ -47,35 +60,21 @@ async function run() {
         // Run pylint
         let options = {};
         options.listeners = {
-            stdout: (data) => {
-                output += data.toString();
-            },
-            stderr: (data) => {
-                output += data.toString();
-            }
+            stdout: (data) => { output += data.toString(); },
+            stderr: (data) => { output += data.toString(); }
         }
         await exec.exec('/bin/bash', ['-c', `pylint ${path} -f json ${pylint_options}`], options);
     } catch (error) {
         // Parse pylint output
-        const pylint_output = JSON.parse(output);
-
-        message_types = ['error', 'warning', 'info', 'convention', 'refactor'];
-
-        final_msg = '';
-        for (msg_type in message_types) {
-            msgs = pylint_output.filter(message => message.type == msg_type);
-            msg = buildMessage(msgs, msg_type);
-            final_msg += msg;
-        }
-        console.log(final_msg);
+        message = buildMessage(JSON.parse(output));
 
         // Comment on PR
-        if ((pr_message) && (message !== default_no_error_message)) {
+        if (pr_message && (message !== default_no_error_message)) {
             commentPr(message, GITHUB_TOKEN);
         }
 
         // Fail if needed
-        if ((fail) && (message !== default_no_error_message)) {
+        if (fail && (message !== default_no_error_message)) {
             core.setFailed(message);
         }
     }
