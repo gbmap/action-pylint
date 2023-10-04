@@ -20,6 +20,77 @@ inputs:
     description: "Options to be passed to pylint"
     required: false
     default: ""
+
+  min-score:
+    description: "Minimum score to pass the action (default is 0)"
+    required: false
+    default: 0
+
+  error-header:
+    description: "Header for errors"
+    required: false
+    default: "🚫 Errors"
+  error-collapse:
+    description: "Collapse table for errors when sending PR message."
+    required: false
+    default: false
+  error-max-count:
+    description: "Maximum count of errors to fail."
+    required: false
+    default: 0
+  
+  warning-header:
+    description: "Header for warnings"
+    required: false
+    default: "⚠️ Warnings"
+  warning-collapse:
+    description: "Collapse table for warnings when sending PR message."
+    required: false
+    default: true 
+  warning-max-count:
+    description: "Maximum count of warnings to fail."
+    required: false
+    default: -1
+
+  info-header:
+    description: "Header for infos"
+    required: false
+    default: "ℹ️ Infos"
+  info-collapse:
+    description: "Collapse table for infos when sending PR message."
+    required: false
+    default: true
+  info-max-count: 
+    description: "Maximum count of infos to fail."
+    required: false
+    default: -1
+  
+  refactor-header:
+    description: "Header for refactors"
+    required: false
+    default: "🛠 Refactors"
+  refactor-collapse:  
+    description: "Collapse table for refactors when sending PR message."
+    required: false
+    default: true 
+  refactor-max-count:
+    description: "Maximum count of refactors to fail."
+    required: false
+    default: -1
+
+  convention-header:
+    description: "Header for conventions"
+    required: false
+    default: "📖 Conventions"
+  convention-collapse:
+    description: "Collapse table for conventions when sending PR message."
+    required: false
+    default: true
+  convention-max-count:
+    description: "Maximum count of conventions to fail."
+    required: false
+    default: -1
+
 runs:
   using: "node12"
   main: "dist/index.js"
