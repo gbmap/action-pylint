@@ -11030,6 +11030,7 @@ const exec = __nccwpck_require__(8071);
 const github = __nccwpck_require__(7597);
 
 let pr_message = core.getInput('pr-message');
+let force_pr_message = core.getInput('force-pr-message');
 let GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
 let pylint_options = core.getInput('pylint-options');
 let min_score = core.getInput('min-score');
@@ -11062,7 +11063,8 @@ function buildMessage(pylint_output, min_score) {
     pylint_messages = pylint_output["messages"];
     message_types.forEach(msg_type => {
         msgs = pylint_messages.filter(message => message.type == msg_type);
-        message += buildMessageTable(msgs, core.getInput(`${msg_type}-header`), core.getInput(`${msg_type}-collapse`) === "true");
+        message += buildMessageTable(msgs, core.getInput(`${msg_type}-header`), true); // core.getInput(`${msg_type}-collapse`));
+        // collapse is not working
     });
     return message;
 }
@@ -11135,7 +11137,7 @@ async function run() {
     } catch (error) {
         // Parse pylint output
         pylint_output = JSON.parse(output);
-        if (failed(pylint_output) && pr_message) {
+        if ((failed(pylint_output) && pr_message) || force_pr_message) {
             commentPr(buildMessage(pylint_output, min_score), GITHUB_TOKEN);
         }
     }

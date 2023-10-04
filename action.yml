@@ -16,6 +16,10 @@ inputs:
     description: "If true, the action will send a PR message if pylint finds errors (default is true)"
     required: true
     default: true
+  force-pr-message:
+    description: "If true, the action will send a PR message even if pylint does not find errors (default is false)"
+    required: true
+    default: false
   pylint-options:
     description: "Options to be passed to pylint"
     required: false

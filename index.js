@@ -3,6 +3,7 @@ const exec = require('@actions/exec');
 const github = require('@actions/github');
 
 let pr_message = core.getInput('pr-message');
+let force_pr_message = core.getInput('force-pr-message');
 let GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
 let pylint_options = core.getInput('pylint-options');
 let min_score = core.getInput('min-score');
@@ -109,7 +110,7 @@ async function run() {
     } catch (error) {
         // Parse pylint output
         pylint_output = JSON.parse(output);
-        if (failed(pylint_output) && pr_message) {
+        if ((failed(pylint_output) && pr_message) || force_pr_message) {
             commentPr(buildMessage(pylint_output, min_score), GITHUB_TOKEN);
         }
     }
