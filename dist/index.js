@@ -11115,6 +11115,7 @@ function failed(pylint_output) {
 }
 
 async function run() {
+  let output = '';
     try {
         configs = loadConfigs(message_types);
 
@@ -11126,7 +11127,6 @@ async function run() {
 
         // Run pylint
         let options = {};
-        let output = '';
         options.listeners = {
             stdout: (data) => { output += data.toString(); },
             stderr: (data) => { output += data.toString(); }
