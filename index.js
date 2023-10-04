@@ -35,7 +35,8 @@ function buildMessage(pylint_output, min_score) {
     pylint_messages = pylint_output["messages"];
     message_types.forEach(msg_type => {
         msgs = pylint_messages.filter(message => message.type == msg_type);
-        message += buildMessageTable(msgs, core.getInput(`${msg_type}-header`), core.getInput(`${msg_type}-collapse`) === "true");
+        message += buildMessageTable(msgs, core.getInput(`${msg_type}-header`), true); // core.getInput(`${msg_type}-collapse`));
+        // collapse is not working
     });
     return message;
 }
