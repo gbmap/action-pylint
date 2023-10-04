@@ -2,13 +2,10 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const github = require('@actions/github');
 
-let fail = core.getInput('fail');
 let pr_message = core.getInput('pr-message');
 let GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
 let pylint_options = core.getInput('pylint-options');
 let min_score = core.getInput('min-score');
-
-const default_no_error_message = 'No lint errors found';
 
 let message_types = ['error', 'warning', 'info', 'convention', 'refactor'];
 
@@ -38,14 +35,14 @@ function buildMessage(pylint_output, min_score) {
     pylint_messages = pylint_output["messages"];
     message_types.forEach(msg_type => {
         msgs = pylint_messages.filter(message => message.type == msg_type);
-        message += buildMessageTable(msgs, core.getInput(`${msg_type}-header`), core.getInput(`${msg_type}-collapse`));
+        message += buildMessageTable(msgs, core.getInput(`${msg_type}-header`), Boolean.parse(core.getInput(`${msg_type}-collapse`)));
     });
     return message;
 }
 
 function buildMessageTable(msgs, header, collapse) {
     let msg = `### ${header} (${msgs.length})\n`;
-    if (collapse) {
+    if (collapse == "true") {
         msg = `<details><summary><h3>${header} (${msgs.length})</h3></summary><p>\n\n`;
     }
     msg += '| Code | Description | File | Line | Column |\n';
