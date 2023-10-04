@@ -11075,7 +11075,7 @@ function buildMessageTable(msgs, header, collapse) {
     }
 
     let msg = `### ${header} (${msgs.length})\n`;
-    if (collapse == "true") {
+    if (collapse) {
         msg = `<details><summary><h3>${header} (${msgs.length})</h3></summary><p>\n\n`;
     }
     msg += '| Code | Description | File | Line | Column |\n';
