@@ -11126,6 +11126,7 @@ async function run() {
 
         // Run pylint
         let options = {};
+        let output = '';
         options.listeners = {
             stdout: (data) => { output += data.toString(); },
             stderr: (data) => { output += data.toString(); }
