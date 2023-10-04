@@ -11039,7 +11039,7 @@ let message_types = ['error', 'warning', 'info', 'convention', 'refactor'];
 let message_headers = {
     'error': 'Errors 🚫',
     'warning': 'Warnings ⚠️',
-    'info': 'Information ⚠',
+    'info': 'Information ℹ️',
     'convention': 'Conventions 📖',
     'refactor': 'Refactors 🛠️'
 };
