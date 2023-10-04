@@ -43,6 +43,8 @@ function buildMessageTable(msgs, header) {
     msgs.forEach(m => {
         msg += `| ${m['message-id']} | ${m.message} | ${m.path} | ${m.line} | ${m.column} |\n`;
     })
+    msg += '\n';
+    return msg;
 }
 
 async function run() {
