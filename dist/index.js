@@ -11115,7 +11115,7 @@ function failed(pylint_output) {
 }
 
 async function run() {
-  let output = '';
+    let output = '';
     try {
         configs = loadConfigs(message_types);
 
