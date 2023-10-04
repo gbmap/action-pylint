@@ -11068,6 +11068,10 @@ function buildMessage(pylint_output, min_score) {
 }
 
 function buildMessageTable(msgs, header, collapse) {
+    if (msgs.length == 0) {
+        return "";
+    }
+
     let msg = `### ${header} (${msgs.length})\n`;
     if (collapse == "true") {
         msg = `<details><summary><h3>${header} (${msgs.length})</h3></summary><p>\n\n`;
