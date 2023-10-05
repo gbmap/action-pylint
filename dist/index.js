@@ -11037,14 +11037,38 @@ let min_score = core.getInput('min-score');
 
 let message_types = ['error', 'warning', 'info', 'convention', 'refactor'];
 
+let report_header = "# 🧶 Pylint Results\n";
+
+function searchExistingComment(context, client) {
+    // searches the PR for an existing comment from this action
+    const comments = client.rest.issues.listComments({
+        ...context.repo,
+        issue_number: context.payload.pull_request.number
+    });
+    const comment = comments.find(comment => comment.user.login === 'github-actions[bot]' && comment.body.startsWith(report_header));
+    return comment;
+}
+
 function commentPr(message, token) {
     const context = github.context;
     const client = github.getOctokit(token);
-    client.rest.issues.createComment({
-        ...context.repo,
-        issue_number: context.payload.pull_request.number,
-        body: message
-    });
+
+    coment = searchExistingComment(context, client);
+    if (coment) {
+        client.rest.issues.updateComment({
+            ...context.repo,
+            comment_id: coment.id,
+            body: message
+        });
+        return;
+    }
+    else {
+        client.rest.issues.createComment({
+            ...context.repo,
+            issue_number: context.payload.pull_request.number,
+            body: message
+        });
+    }
 }
 
 function buildMessage(pylint_output, min_score) {
