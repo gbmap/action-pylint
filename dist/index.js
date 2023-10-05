@@ -11030,6 +11030,7 @@ const exec = __nccwpck_require__(8071);
 const github = __nccwpck_require__(7597);
 
 let pr_message = core.getInput('pr-message');
+let pr_number = core.getInput('pull-request-number');
 let force_pr_message = core.getInput('force-pr-message');
 let GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
 let pylint_options = core.getInput('pylint-options');
@@ -11044,10 +11045,10 @@ function searchExistingPRComment() {
     const context = github.context;
     const client = github.getOctokit(GITHUB_TOKEN);
 
-    let comments = client.rest.pulls.listReviewComments({
+    let comments = client.rest.issues.listComments({
         ...context.repo,
-        pull_number: context.payload.pull_request.number,
-    })
+        issue_number: context.payload.pull_request.number
+    });
     
     core.warning(comments)
     for (var comment in comments) {

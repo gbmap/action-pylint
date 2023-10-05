@@ -5,6 +5,9 @@ inputs:
   GITHUB_TOKEN:
     description: "GitHub token"
     required: true
+  pull-request-number:
+    description: "Pull request number"
+    required: true
   path:
     description: "Path of files"
     required: true
