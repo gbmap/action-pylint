@@ -11047,11 +11047,11 @@ function searchExistingComment(context, client) {
     });
     
     for (var comment in comments) {
-        core.info('==========================')
-        core.info(`Found existing comment ${comment.id}`)
-        core.info(comment.body)
-        core.info('==========================')
-        if (comment.body.startsWith(report_header)) {
+        core.warning('==========================')
+        core.warning(`Found existing comment ${comment.id}`)
+        core.warning(comment.body)
+        core.warning('==========================')
+        if (comment.search(report_header) != -1) {
             return comment;
         }
     }
