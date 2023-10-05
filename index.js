@@ -19,6 +19,7 @@ function searchExistingComment(context, client) {
         issue_number: context.payload.pull_request.number
     });
     
+    core.warning(comments)
     for (var comment in comments) {
         core.warning('==========================')
         core.warning(`Found existing comment ${comment.id}`)
