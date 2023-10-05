@@ -10912,14 +10912,6 @@ module.exports = require("path");
 
 /***/ }),
 
-/***/ 7282:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("process");
-
-/***/ }),
-
 /***/ 5477:
 /***/ ((module) => {
 
@@ -11036,7 +11028,6 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(5154);
 const exec = __nccwpck_require__(8071);
 const github = __nccwpck_require__(7597);
-const { report } = __nccwpck_require__(7282);
 
 let pr_message = core.getInput('pr-message');
 let pr_number = core.getInput('pull-request-number');
@@ -11049,39 +11040,8 @@ let message_types = ['error', 'warning', 'info', 'convention', 'refactor'];
 
 let report_header = "# 🧶 Pylint Results\n";
 
-// function publishMessage(pr: number, message: string): Promise<void> {
-//   const body = TITLE.concat(message)
-//   core.summary.addRaw(body).write()
-
-//   const comments = await octokit.rest.issues.listComments({
-//     ...context.repo,
-//     issue_number: pr
-//   })
-//   const exist = comments.data.find(commnet => {
-//     return commnet.body?.startsWith(TITLE)
-//   })
-
-//   if (exist) {
-//     await octokit.rest.issues.updateComment({
-//       ...context.repo,
-//       issue_number: pr,
-//       comment_id: exist.id,
-//       body
-//     })
-//   } else {
-//     await octokit.rest.issues.createComment({
-//       ...context.repo,
-//       issue_number: pr,
-//       body
-//     })
-//   }
-// }
-
-async function searchExistingPRComment() {
+async function searchExistingPRComment(context, octokit) {
     // searches the PR for an existing comment from this action
-    const context = github.context;
-    const octokit = github.getOctokit(GITHUB_TOKEN);
-
     let comments = await octokit.rest.issues.listComments({
         ...context.repo,
         issue_number: context.issue.number
@@ -11098,11 +11058,11 @@ async function searchExistingPRComment() {
 
 async function commentPr(message, token) {
     const context = github.context;
-    const client = github.getOctokit(token);
+    const octokit = github.getOctokit(token);
 
-    let comment = await searchExistingPRComment();
+    let comment = await searchExistingPRComment(context, octokit);
     if (comment) {
-        await client.rest.issues.updateComment({
+        await octokit.rest.issues.updateComment({
             ...context.repo,
             issue_number: context.issue.number,
             comment_id: comment.id,
@@ -11110,7 +11070,7 @@ async function commentPr(message, token) {
         });
     }
     else {
-        await client.rest.issues.createComment({
+        await octokit.rest.issues.createComment({
             ...context.repo,
             issue_number: context.issue.number,
             body: message
@@ -11137,6 +11097,8 @@ function buildMessage(pylint_output, min_score) {
         message += buildMessageTable(msgs, core.getInput(`${msg_type}-header`), true); // core.getInput(`${msg_type}-collapse`));
         // collapse is not working
     });
+
+    message += "\n> __Commit:__ _" + github.context.sha + "_\n";
     return message;
 }
 

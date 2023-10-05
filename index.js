@@ -1,7 +1,6 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const github = require('@actions/github');
-const { report } = require('process');
 
 let pr_message = core.getInput('pr-message');
 let pr_number = core.getInput('pull-request-number');
@@ -14,39 +13,8 @@ let message_types = ['error', 'warning', 'info', 'convention', 'refactor'];
 
 let report_header = "# 🧶 Pylint Results\n";
 
-// function publishMessage(pr: number, message: string): Promise<void> {
-//   const body = TITLE.concat(message)
-//   core.summary.addRaw(body).write()
-
-//   const comments = await octokit.rest.issues.listComments({
-//     ...context.repo,
-//     issue_number: pr
-//   })
-//   const exist = comments.data.find(commnet => {
-//     return commnet.body?.startsWith(TITLE)
-//   })
-
-//   if (exist) {
-//     await octokit.rest.issues.updateComment({
-//       ...context.repo,
-//       issue_number: pr,
-//       comment_id: exist.id,
-//       body
-//     })
-//   } else {
-//     await octokit.rest.issues.createComment({
-//       ...context.repo,
-//       issue_number: pr,
-//       body
-//     })
-//   }
-// }
-
-async function searchExistingPRComment() {
+async function searchExistingPRComment(context, octokit) {
     // searches the PR for an existing comment from this action
-    const context = github.context;
-    const octokit = github.getOctokit(GITHUB_TOKEN);
-
     let comments = await octokit.rest.issues.listComments({
         ...context.repo,
         issue_number: context.issue.number
@@ -63,11 +31,11 @@ async function searchExistingPRComment() {
 
 async function commentPr(message, token) {
     const context = github.context;
-    const client = github.getOctokit(token);
+    const octokit = github.getOctokit(token);
 
-    let comment = await searchExistingPRComment();
+    let comment = await searchExistingPRComment(context, octokit);
     if (comment) {
-        await client.rest.issues.updateComment({
+        await octokit.rest.issues.updateComment({
             ...context.repo,
             issue_number: context.issue.number,
             comment_id: comment.id,
@@ -75,7 +43,7 @@ async function commentPr(message, token) {
         });
     }
     else {
-        await client.rest.issues.createComment({
+        await octokit.rest.issues.createComment({
             ...context.repo,
             issue_number: context.issue.number,
             body: message
@@ -102,6 +70,8 @@ function buildMessage(pylint_output, min_score) {
         message += buildMessageTable(msgs, core.getInput(`${msg_type}-header`), true); // core.getInput(`${msg_type}-collapse`));
         // collapse is not working
     });
+
+    message += "\n> __Commit:__ _" + github.context.sha + "_\n";
     return message;
 }
 
