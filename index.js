@@ -19,8 +19,12 @@ function searchExistingComment(context, client) {
         issue_number: context.payload.pull_request.number
     });
     
-    for (comment in comments) {
+    for (var comment in comments) {
         if (comment.body.startsWith(report_header)) {
+            core.info('==========================')
+            core.info(`Found existing comment ${comment.id}`)
+            core.info(comment.body)
+            core.info('==========================')
             return comment;
         }
     }
@@ -31,11 +35,11 @@ function commentPr(message, token) {
     const context = github.context;
     const client = github.getOctokit(token);
 
-    coment = searchExistingComment(context, client);
-    if (coment) {
+    let comment = searchExistingComment(context, client);
+    if (comment) {
         client.rest.issues.updateComment({
             ...context.repo,
-            comment_id: coment.id,
+            comment_id: comment.id,
             body: message
         });
         return;
