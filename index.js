@@ -12,12 +12,15 @@ let message_types = ['error', 'warning', 'info', 'convention', 'refactor'];
 
 let report_header = "# 🧶 Pylint Results\n";
 
-function searchExistingComment(context, client) {
+function searchExistingPRComment() {
     // searches the PR for an existing comment from this action
-    const comments = client.rest.issues.listComments({
+    const context = github.context;
+    const client = github.getOctokit(GITHUB_TOKEN);
+
+    let comments = client.rest.pulls.listReviewComments({
         ...context.repo,
-        issue_number: context.payload.pull_request.number
-    });
+        pull_number: context.issue.number,
+    })
     
     core.warning(comments)
     for (var comment in comments) {
@@ -36,7 +39,7 @@ function commentPr(message, token) {
     const context = github.context;
     const client = github.getOctokit(token);
 
-    let comment = searchExistingComment(context, client);
+    let comment = searchExistingPRComment();
     if (comment) {
         client.rest.issues.updateComment({
             ...context.repo,
