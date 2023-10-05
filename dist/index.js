@@ -10912,6 +10912,14 @@ module.exports = require("path");
 
 /***/ }),
 
+/***/ 7282:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("process");
+
+/***/ }),
+
 /***/ 5477:
 /***/ ((module) => {
 
@@ -11028,6 +11036,7 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(5154);
 const exec = __nccwpck_require__(8071);
 const github = __nccwpck_require__(7597);
+const { report } = __nccwpck_require__(7282);
 
 let pr_message = core.getInput('pr-message');
 let pr_number = core.getInput('pull-request-number');
@@ -11040,53 +11049,77 @@ let message_types = ['error', 'warning', 'info', 'convention', 'refactor'];
 
 let report_header = "# 🧶 Pylint Results\n";
 
-function searchExistingPRComment() {
+// function publishMessage(pr: number, message: string): Promise<void> {
+//   const body = TITLE.concat(message)
+//   core.summary.addRaw(body).write()
+
+//   const comments = await octokit.rest.issues.listComments({
+//     ...context.repo,
+//     issue_number: pr
+//   })
+//   const exist = comments.data.find(commnet => {
+//     return commnet.body?.startsWith(TITLE)
+//   })
+
+//   if (exist) {
+//     await octokit.rest.issues.updateComment({
+//       ...context.repo,
+//       issue_number: pr,
+//       comment_id: exist.id,
+//       body
+//     })
+//   } else {
+//     await octokit.rest.issues.createComment({
+//       ...context.repo,
+//       issue_number: pr,
+//       body
+//     })
+//   }
+// }
+
+async function searchExistingPRComment() {
     // searches the PR for an existing comment from this action
     const context = github.context;
-    const client = github.getOctokit(GITHUB_TOKEN);
+    const octokit = github.getOctokit(GITHUB_TOKEN);
 
-    let comments = client.rest.issues.listComments({
+    let comments = await octokit.rest.issues.listComments({
         ...context.repo,
-        issue_number: context.payload.pull_request.number
+        issue_number: context.issue.number
     });
-    
-    core.warning(comments)
-    for (var comment in comments) {
-        core.warning('==========================')
-        core.warning(`Found existing comment ${comment.id}`)
-        core.warning(comment.body)
-        core.warning('==========================')
-        if (comment.search(report_header) != -1) {
-            return comment;
-        }
+
+    const exist = comments.data.find(comment => {
+        return comment.body?.startsWith(report_header)
+    })
+    if (exist) {
+        return exist;
     }
-    return null;
+    return null
 }
 
-function commentPr(message, token) {
+async function commentPr(message, token) {
     const context = github.context;
     const client = github.getOctokit(token);
 
-    let comment = searchExistingPRComment();
+    let comment = await searchExistingPRComment();
     if (comment) {
-        client.rest.issues.updateComment({
+        await client.rest.issues.updateComment({
             ...context.repo,
+            issue_number: context.issue.number,
             comment_id: comment.id,
             body: message
         });
-        return;
     }
     else {
-        client.rest.issues.createComment({
+        await client.rest.issues.createComment({
             ...context.repo,
-            issue_number: context.payload.pull_request.number,
+            issue_number: context.issue.number,
             body: message
         });
     }
 }
 
 function buildMessage(pylint_output, min_score) {
-    let message = "# 🧶 Pylint Results\n";
+    let message = report_header;
 
     pylint_report = pylint_output["statistics"];
 
