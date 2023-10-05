@@ -18,8 +18,13 @@ function searchExistingComment(context, client) {
         ...context.repo,
         issue_number: context.payload.pull_request.number
     });
-    const comment = comments.find(comment => comment.user.login === 'github-actions[bot]' && comment.body.startsWith(report_header));
-    return comment;
+    
+    for (comment in comments) {
+        if (comment.body.startsWith(report_header)) {
+            return comment;
+        }
+    }
+    return null;
 }
 
 function commentPr(message, token) {
