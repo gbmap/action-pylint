@@ -20,11 +20,11 @@ function searchExistingComment(context, client) {
     });
     
     for (var comment in comments) {
+        core.info('==========================')
+        core.info(`Found existing comment ${comment.id}`)
+        core.info(comment.body)
+        core.info('==========================')
         if (comment.body.startsWith(report_header)) {
-            core.info('==========================')
-            core.info(`Found existing comment ${comment.id}`)
-            core.info(comment.body)
-            core.info('==========================')
             return comment;
         }
     }
