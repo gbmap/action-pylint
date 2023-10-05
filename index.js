@@ -19,7 +19,7 @@ function searchExistingPRComment() {
 
     let comments = client.rest.pulls.listReviewComments({
         ...context.repo,
-        pull_number: context.issue.number,
+        pull_number: context.payload.pull_request.number,
     })
     
     core.warning(comments)
